@@ -2,8 +2,10 @@ import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo/app_theme.dart';
+import 'package:todo/auth/user_provider.dart';
 import 'package:todo/tabs/tasks/task_item.dart';
 import 'package:todo/tabs/tasks/tasks_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TasksTab extends StatefulWidget {
   @override
@@ -17,8 +19,10 @@ class _TasksTabState extends State<TasksTab> {
   Widget build(BuildContext context) {
     double screenHight = MediaQuery.sizeOf(context).height;
     TasksProvider tasksProvider = Provider.of<TasksProvider>(context);
+    String userId =
+        Provider.of<UserProvider>(context, listen: false).currentUser!.id;
     if (shouldGetTasks) {
-      tasksProvider.getTasks();
+      tasksProvider.getTasks(userId);
       shouldGetTasks = false;
     }
 
@@ -35,7 +39,7 @@ class _TasksTabState extends State<TasksTab> {
               start: 20,
               child: SafeArea(
                 child: Text(
-                  'ToDo List',
+                  AppLocalizations.of(context)!.todoList,
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
@@ -49,10 +53,8 @@ class _TasksTabState extends State<TasksTab> {
                 firstDate: DateTime.now().subtract(Duration(days: 365)),
                 focusDate: tasksProvider.selectedDate,
                 lastDate: DateTime.now().add(Duration(days: 365)),
-                onDateChange: (selectedDate) {
-                  tasksProvider.changeSelectedDate(selectedDate);
-                  tasksProvider.getTasks();
-                },
+                onDateChange: (selectedDate) =>
+                    tasksProvider.getSelectedDateTasks(selectedDate, userId),
                 showTimelineHeader: false,
                 dayProps: EasyDayProps(
                   height: 79,
